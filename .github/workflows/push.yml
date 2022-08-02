@@ -31,4 +31,5 @@ jobs:
       - name: deploy
         run: |
           zip -j deploy.zip ./*
-          aws lambda update-function-code --function-name=lambda-git-commit --zip-file=fileb://deploy.zip 
+          aws lambda update-function-code --function-name=lambda-git-commit --zip-file=fileb://deploy.zip
+          aws lambda publish-version --function-name lambda-git-commit --description $(git rev-parse --short "$GITHUB_SHA")
