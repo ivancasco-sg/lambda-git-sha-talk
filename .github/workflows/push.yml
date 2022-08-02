@@ -1,0 +1,34 @@
+name: deploy to lambda
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+
+  deploy_zip:
+    name: deploy lambda function
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+      - name: npm install
+        env:
+          CI: true
+        run: |
+          npm ci 
+      - name: Configure AWS Credentials  
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::973081273628:role/lambda-git-commit-talk
+          role-session-name: githubactionsession
+          aws-region: eu-west-1
+      - name: deploy
+        run: |
+          zip -j deploy.zip ./*
+          aws lambda update-function-code --function-name=lambda-git-commit --zip-file=fileb://deploy.zip 
